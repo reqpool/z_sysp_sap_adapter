@@ -340,20 +340,58 @@ field-symbols: <waDictStruct> type tDictTable.
 *----------------------------------------------------------------------------------------------------------------------
 *  Selection screen declaration
 *----------------------------------------------------------------------------------------------------------------------
-* Author
-selection-screen: begin of block b1 with frame title tBlock1.
+* File details
+selection-screen: begin of block b4 with frame title tBlock4.
+* Download to PC
   selection-screen begin of line.
-    selection-screen comment 5(23) tAuth.
-    parameters: pAuth like usr02-bname memory id MAUTH.
+    selection-screen comment 1(25) tPc.
+    parameters: pPc radiobutton group g2 default 'X'.
+  selection-screen end of line.
+  selection-screen begin of line.
+    selection-screen comment 8(20) tPpath.
+    parameters: pFolder like rlgrap-filename memory id MFOLDER.
+  selection-screen end of line.
+* Download to SAP server
+  selection-screen begin of line.
+    selection-screen comment 1(25) tServ.
+    parameters: pServ radiobutton group g2.
+  selection-screen end of line.
+  selection-screen begin of line.
+    selection-screen comment 8(20) tSPath.
+    parameters: pLogical like filename-fileintern memory id MLOGICAL.
+  selection-screen end of line.
+  selection-screen comment /28(60) tSDPath.
+
+  selection-screen begin of line.
+    selection-screen comment 1(20) tPhtml.
+    parameters: pHtml radiobutton group g1.
   selection-screen end of line.
 
   selection-screen begin of line.
-    selection-screen comment 5(36) tPmod.
-    parameters: pMod as checkbox.
+    selection-screen comment 5(29) tBack.
+    parameters: pBack as checkbox.
   selection-screen end of line.
-selection-screen: end of block b1.
+
+  selection-screen begin of line.
+    selection-screen comment 1(20) tPtxt.
+    parameters: pTxt radiobutton group g1 default 'X'.
+  selection-screen end of line.
+
+  selection-screen skip.
+selection-screen: end of block b4.
+
 
 selection-screen begin of block b2 with frame title tBlock2.
+* Programs / includes
+  selection-screen begin of line.
+    parameters: rProg radiobutton group r1 default 'X'.
+    selection-screen comment 5(18) tProg.
+  selection-screen end of line.
+
+  selection-screen begin of line.
+    selection-screen comment 10(15) tRpname.
+    select-options: soProg for trdir-name default 'Z*' OPTION CP.
+  selection-screen end of line.
 * Tables
   selection-screen begin of line.
     parameters: rTable radiobutton group r1.
@@ -429,17 +467,6 @@ selection-screen begin of block b2 with frame title tBlock2.
     select-options: soClass for seoclass-clsname.
   selection-screen end of line.
 
-* Programs / includes
-  selection-screen begin of line.
-    parameters: rProg radiobutton group r1 default 'X'.
-    selection-screen comment 5(18) tProg.
-  selection-screen end of line.
-
-  selection-screen begin of line.
-    selection-screen comment 10(15) tRpname.
-    select-options: soProg for trdir-name.
-  selection-screen end of line.
-
   selection-screen skip.
 * Language
   selection-screen begin of line.
@@ -465,6 +492,19 @@ selection-screen begin of block b2 with frame title tBlock2.
     parameters: pCName type namespace memory id MNAMESPACE.
   selection-screen end of line.
 selection-screen: end of block b2.
+
+* Author
+selection-screen: begin of block b1 with frame title tBlock1.
+  selection-screen begin of line.
+    selection-screen comment 5(23) tAuth.
+    parameters: pAuth like usr02-bname memory id MAUTH.
+  selection-screen end of line.
+
+  selection-screen begin of line.
+    selection-screen comment 5(36) tPmod.
+    parameters: pMod as checkbox.
+  selection-screen end of line.
+selection-screen: end of block b1.
 
 * Additional things to download.
 selection-screen: begin of block b3 with frame title tBlock3.
@@ -532,47 +572,6 @@ selection-screen: begin of block b3 with frame title tBlock3.
     parameters: pSortT as checkbox default ' ' memory id MSORTT.
   selection-screen end of line.
 selection-screen: end of block b3.
-
-* File details
-selection-screen: begin of block b4 with frame title tBlock4.
-  selection-screen begin of line.
-    selection-screen comment 1(20) tPhtml.
-    parameters: pHtml radiobutton group g1 default 'X'.
-  selection-screen end of line.
-
-  selection-screen begin of line.
-    selection-screen comment 5(29) tBack.
-    parameters: pBack as checkbox default 'X'.
-  selection-screen end of line.
-
-  selection-screen begin of line.
-    selection-screen comment 1(20) tPtxt.
-    parameters: pTxt radiobutton group g1.
-  selection-screen end of line.
-
-  selection-screen skip.
-
-* Download to SAP server
-  selection-screen begin of line.
-    selection-screen comment 1(25) tServ.
-    parameters: pServ radiobutton group g2.
-  selection-screen end of line.
-  selection-screen begin of line.
-    selection-screen comment 8(20) tSPath.
-    parameters: pLogical like filename-fileintern memory id MLOGICAL.
-  selection-screen end of line.
-  selection-screen comment /28(60) tSDPath.
-
-* Download to PC
-  selection-screen begin of line.
-    selection-screen comment 1(25) tPc.
-    parameters: pPc radiobutton group g2 default 'X'.
-  selection-screen end of line.
-  selection-screen begin of line.
-    selection-screen comment 8(20) tPpath.
-    parameters: pFolder like rlgrap-filename memory id MFOLDER.
-  selection-screen end of line.
-selection-screen: end of block b4.
 
 * Display options
 selection-screen: begin of block b5 with frame title tBlock5.
@@ -4901,7 +4900,7 @@ data: completeSavePath type string.
 
   if htmlFileFlag is initial.
     append '' to iHtmlTable.
-    append  '----------------------------------------------------------------------------------' to iHtmlTable.
+    append  '* ----------------------------------------------------------------------------------' to iHtmlTable.
 
     perform buildFooterMessage using iHtmlTable.
     append iHtmlTable.
@@ -5260,7 +5259,7 @@ data: completeSavePath type string.
 
   if convertToHtml is initial.
     append '' to iLines.
-    append '----------------------------------------------------------------------------------' to iLines.
+    append '* ----------------------------------------------------------------------------------' to iLines.
     perform buildFooterMessage using iLines.
     append iLines.
   else.
@@ -5445,7 +5444,7 @@ data: completeSavePath type string.
 
   if convertToHtml is initial.
     append '' to iLines.
-    append '----------------------------------------------------------------------------------' to iLines.
+    append '* ----------------------------------------------------------------------------------' to iLines.
     perform buildFooterMessage using iLines.
     append iLines.
   else.
@@ -5549,7 +5548,7 @@ data: completeSavePath type string.
 
   if convertToHtml is initial.
     append '' to iLines.
-    append '----------------------------------------------------------------------------------' to iLines.
+    append '* ----------------------------------------------------------------------------------' to iLines.
     perform buildFooterMessage using iLines.
     append iLines.
   else.
@@ -5655,7 +5654,7 @@ data: completeSavePath type string.
 
     if convertToHtml is initial.
       append '' to iLines.
-      append '----------------------------------------------------------------------------------' to ilines.
+      append '* ----------------------------------------------------------------------------------' to ilines.
       perform buildFooterMessage using iLines.
       append iLines.
     else.
@@ -5750,7 +5749,7 @@ data: completeSavePath type string.
 
   if convertToHtml is initial.
     append '' to iLines.
-    append '----------------------------------------------------------------------------------' to iLines.
+    append '* ----------------------------------------------------------------------------------' to iLines.
     perform buildFooterMessage using iLines.
     append iLines.
   else.
@@ -6529,7 +6528,7 @@ data: completeSavePath type string.
 
     if convertToHtml is initial.
       append iLines.
-      append  '----------------------------------------------------------------------------------' to iLines.
+      append  '* ----------------------------------------------------------------------------------' to iLines.
       append iLines.
       perform buildFooterMessage using iLines.
       append iLines.
@@ -6644,7 +6643,7 @@ data: completeSavePath type string.
 
     if convertToHtml is initial.
       append iLines.
-      append  '----------------------------------------------------------------------------------' to iLines.
+      append  '* ----------------------------------------------------------------------------------' to iLines.
       append iLines.
       perform buildFooterMessage using iLines.
       append iLines.
@@ -8654,7 +8653,7 @@ endform.                                                                        
 *----------------------------------------------------------------------------------------------------------------------
 form buildFooterMessage using returnMessage.
 
-  concatenate `Extracted by Mass Download version `
+  concatenate `* Extracted by Mass Download version `
               VERSIONNO ` - E.G.Mellodew. 1998-`
               sy-datum+0(4) `. Sap Release ` sy-saprl into returnMessage.
 endform.                                                                                            "buildFooterMessage
