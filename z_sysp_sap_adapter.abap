@@ -1143,6 +1143,8 @@ end-of-selection.
         endif.
     endcase.
 
+    perform downloadSysparencyDump.
+
 *   Free all the memory IDs we may have built up in the program
 *   Free up any memory used for caching HTML versions of objects
     perform freeMemory using iPrograms[]
@@ -1338,7 +1340,7 @@ form checkComboBoxes.
     endif.
   else.
 *   Check the user name of the person objects are to be downloaded for
-    if pAuth = 'SAP*' or pauth = 'SAP'.
+    if pAuth = 'SAP*' or pAuth = 'SAP'.
       statusBarMessage = 'Sorry cannot download all objects for SAP standard user'.
     endif.
   endif.
@@ -9419,6 +9421,119 @@ endform.                                                                        
 *----------------------------------------------------------------------------------------------------------------------
 form topOfPage.
 
+endform.
+
+form downloadSysparencyDump.
+   TYPES: BEGIN OF t_datatab,
+         jobcount   TYPE tbtco-jobcount,
+         jobname    TYPE tbtco-jobname,
+         jobgroup   TYPE tbtco-jobgroup,
+         stepcount  TYPE tbtcp-stepcount,
+         progname   TYPE tbtcp-progname,
+         lastchname TYPE tbtco-lastchname,
+         periodic   TYPE tbtco-periodic,
+         sdlstrtdt  TYPE tbtco-strtdate,
+         sdlstrttm  TYPE tbtco-strttime,
+         strtdate   TYPE tbtco-strtdate,
+         strttime   TYPE tbtco-strttime,
+         prdmonths  TYPE tbtco-prdmonths,
+         prdweeks   TYPE tbtco-prdweeks,
+         prddays    TYPE tbtco-prddays,
+         prdhours   TYPE tbtco-prdhours,
+         prdmins    TYPE tbtco-prdmins,
+         btcsystem  TYPE tbtco-btcsystem,
+         status     TYPE tbtco-status,
+         succnum    TYPE tbtco-succnum,
+         prednum    TYPE tbtco-prednum,
+         jobclass   TYPE tbtco-jobclass,
+         priority   TYPE tbtco-priority,
+         eventid    TYPE btcevtjob-eventid,
+       END OF t_datatab.
+
+  DATA: it_datatab TYPE STANDARD TABLE OF t_datatab INITIAL SIZE 0.
+
+  SELECT j~jobcount
+  j~jobname
+  j~jobgroup
+  s~stepcount
+  s~progname
+  j~lastchname
+  j~periodic
+  j~strtdate
+  j~strttime
+  j~strtdate
+  j~strttime
+  j~prdmonths
+  j~prdweeks
+  j~prddays
+  j~prdhours
+  j~prdmins
+  j~btcsystem
+  j~status
+  j~succnum
+  j~prednum
+  j~jobclass
+  j~priority
+  e~eventid
+    FROM tbtco AS j
+    INNER JOIN tbtcp AS s
+    ON j~jobname = s~jobname AND j~jobcount = s~jobcount
+    LEFT JOIN btcevtjob AS e ON j~jobname = e~jobname AND j~jobcount = e~jobcount
+    INTO CORRESPONDING FIELDS OF TABLE it_datatab
+    WHERE j~status = 'S' OR j~status = 'Y' OR j~status = 'Z' OR j~status = 'R'
+    ORDER BY j~jobname DESCENDING.
+
+  TRY.
+      DATA: jobfilename    TYPE string.
+      CONCATENATE pFolder '/SysparencyJobExport.sysp' INTO jobfilename.
+      cl_gui_frontend_services=>gui_download(
+        EXPORTING
+          filename = jobfilename
+          filetype = 'DAT'
+          codepage = '4110'
+        CHANGING
+          data_tab = it_datatab ).
+    CATCH cx_root INTO DATA(e_text).
+      MESSAGE e_text->get_text( ) TYPE 'I'.
+  ENDTRY.
+
+  TRY.
+      SELECT *
+        INTO TABLE @DATA(it_tstc)
+        FROM tstc
+        WHERE tcode LIKE 'Z%' OR tcode LIKE 'Y%'
+        ORDER BY tcode DESCENDING.
+
+      DATA: transactionfilename    TYPE string.
+      CONCATENATE pFolder '/SysparencyTransactionExport.sysp' INTO transactionfilename.
+      cl_gui_frontend_services=>gui_download(
+        EXPORTING
+          filename = transactionfilename
+          filetype = 'DAT'
+          codepage = '4110'
+        CHANGING
+          data_tab = it_tstc ).
+    CATCH cx_root INTO DATA(e_text2).
+      MESSAGE e_text2->get_text( ) TYPE 'I'.
+  ENDTRY.
+
+  TRY.
+      SELECT *
+        INTO TABLE @DATA(it_progdir)
+        FROM progdir
+        WHERE name LIKE 'Z%' OR name LIKE 'Y%'.
+      DATA: progdirfilename    TYPE string.
+      CONCATENATE pFolder '/SysparencyProgdirExport.sysp' INTO progdirfilename.
+      cl_gui_frontend_services=>gui_download(
+        EXPORTING
+          filename = progdirfilename
+          filetype = 'DAT'
+          codepage = '4110'
+        CHANGING
+          data_tab = it_progdir ).
+    CATCH cx_root INTO DATA(e_text3).
+      MESSAGE e_text3->get_text( ) TYPE 'I'.
+  ENDTRY.
 endform.
 
 
