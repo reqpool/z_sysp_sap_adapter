@@ -380,6 +380,22 @@ selection-screen: begin of block b4 with frame title tBlock4.
   selection-screen skip.
 selection-screen: end of block b4.
 
+* Sysparency downloads
+SELECTION-SCREEN: BEGIN OF BLOCK bsysp WITH FRAME TITLE tblocksy.
+   SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 5(18) tsysjobs.
+    PARAMETERS: psysjobs AS CHECKBOX DEFAULT 'X'.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 5(18) tsystran.
+    PARAMETERS: psystran AS CHECKBOX DEFAULT 'X'.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 5(18) tsysprog.
+    PARAMETERS: psysprog AS CHECKBOX DEFAULT 'X'.
+  SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN: END OF BLOCK bsysp.
+
 
 selection-screen begin of block b2 with frame title tBlock2.
 * Programs / includes
@@ -780,6 +796,10 @@ at selection-screen on value-request for soFGroup-high.
 *----------------------------------------------------------------------------------------------------------------------
 initialization.
 * Parameter screen texts.
+  tblocksy = 'Sysparency Data'.
+  tsysjobs = 'Jobs'.
+  tsystran = 'Transactions'.
+  tsysprog = 'Program structure'.
   tBlock1 = 'Author (Optional)'.
   tBlock2 = 'Objects to download'.
   tBlock3 = 'Additional downloads for programs, function modules and classes'.
@@ -9424,6 +9444,7 @@ form topOfPage.
 endform.
 
 form downloadSysparencyDump.
+  IF psysjobs = 'X'.
    TYPES: BEGIN OF t_datatab,
          jobcount   TYPE tbtco-jobcount,
          jobname    TYPE tbtco-jobname,
@@ -9496,7 +9517,9 @@ form downloadSysparencyDump.
     CATCH cx_root INTO DATA(e_text).
       MESSAGE e_text->get_text( ) TYPE 'I'.
   ENDTRY.
+  ENDIF.
 
+  IF psystran = 'X'.
   TRY.
       SELECT *
         INTO TABLE @DATA(it_tstc)
@@ -9516,7 +9539,9 @@ form downloadSysparencyDump.
     CATCH cx_root INTO DATA(e_text2).
       MESSAGE e_text2->get_text( ) TYPE 'I'.
   ENDTRY.
+  ENDIF.
 
+  IF psysprog = 'X'.
   TRY.
       SELECT *
         INTO TABLE @DATA(it_progdir)
@@ -9534,6 +9559,7 @@ form downloadSysparencyDump.
     CATCH cx_root INTO DATA(e_text3).
       MESSAGE e_text3->get_text( ) TYPE 'I'.
   ENDTRY.
+  ENDIF.
 endform.
 
 
