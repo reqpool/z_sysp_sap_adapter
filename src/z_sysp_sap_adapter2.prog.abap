@@ -60,6 +60,9 @@ START-OF-SELECTION.
     lv_path            TYPE string,
     iv_package         TYPE devclass.
 
+  " this will initialize ZABAPGIT in dictionary
+  zcl_abapgit_migrations=>run( ).
+
   "ls_local_settings-main_language_only = iv_main_lang_only.
 
 * load all matching packages
