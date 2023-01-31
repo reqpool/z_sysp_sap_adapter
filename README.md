@@ -9,4 +9,4 @@ Build was generated using https://github.com/larshp/abapmerge
 
 # z_sysp_sap_adapter (deprecated)
 
-Z-Transaction to dump data needed for Sysparency analysis
+Z-Transaction to dump data needed for Sysparency analysis using zdtp_massdownload
