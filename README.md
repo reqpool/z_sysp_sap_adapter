@@ -1,6 +1,6 @@
 # z_sysp_sap_adapter2 
 
-Z-Transaction to dump data needed for Sysparency analysis using abapGit
+Z-Transaction to dump code and data needed for Sysparency analysis using abapGit
 
 It requires SAP BASIS version 702 or higher.
  
