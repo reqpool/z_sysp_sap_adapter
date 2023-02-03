@@ -5,40 +5,40 @@
 *&---------------------------------------------------------------------*
 REPORT z_sysp_sap_adapter2.
 
-TABLES: tadiv.
+TABLES tadiv.
 
-SELECTION-SCREEN: BEGIN OF BLOCK b1 with frame title tBlock1.
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE tblock1.
 
 SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 1(10) tpack.
-SELECT-OPTIONS: sopack FOR tadiv-devclass DEFAULT 'Z*' OPTION CP.
+SELECT-OPTIONS sopack FOR tadiv-devclass DEFAULT 'Z*' OPTION CP.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 1(10) tppath.
-PARAMETERS: pfolder LIKE rlgrap-filename DEFAULT 'c:/temp'.
+PARAMETERS pfolder LIKE rlgrap-filename DEFAULT 'c:/temp'.
 SELECTION-SCREEN END OF LINE.
 
-SELECTION-SCREEN: END OF BLOCK b1.
+SELECTION-SCREEN END OF BLOCK b1.
 
-SELECTION-SCREEN: BEGIN OF BLOCK bsysp WITH FRAME TITLE tblocksy.
-   SELECTION-SCREEN BEGIN OF LINE.
-    SELECTION-SCREEN COMMENT 5(18) tsysjobs.
-    PARAMETERS: psysjobs AS CHECKBOX DEFAULT 'X'.
-  SELECTION-SCREEN END OF LINE.
-  SELECTION-SCREEN BEGIN OF LINE.
-    SELECTION-SCREEN COMMENT 5(18) tsystran.
-    PARAMETERS: psystran AS CHECKBOX DEFAULT 'X'.
-  SELECTION-SCREEN END OF LINE.
-  SELECTION-SCREEN BEGIN OF LINE.
-    SELECTION-SCREEN COMMENT 5(18) tsysprog.
-    PARAMETERS: psysprog AS CHECKBOX DEFAULT 'X'.
-  SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN: END OF BLOCK bsysp.
+SELECTION-SCREEN BEGIN OF BLOCK bsysp WITH FRAME TITLE tblocksy.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(18) tsysjobs.
+PARAMETERS psysjobs AS CHECKBOX DEFAULT 'X'.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(18) tsystran.
+PARAMETERS psystran AS CHECKBOX DEFAULT 'X'.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(18) tsysprog.
+PARAMETERS psysprog AS CHECKBOX DEFAULT 'X'.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK bsysp.
 
 INITIALIZATION.
   sy-title = 'Sysparency Adapter using abapGit'.
-  tBlock1 = 'Package Download'.
+  tblock1 = 'Package Download'.
   tpack  = 'Package'.
   tppath = 'Folder'.
   tblocksy = 'Sysparency Data'.
@@ -57,12 +57,14 @@ START-OF-SELECTION.
     lo_frontend_serv   TYPE REF TO zif_abapgit_frontend_services,
     lv_default         TYPE string,
     lv_package_escaped TYPE string,
-    lv_path            TYPE string,
+    lv_zipfile_path    TYPE string,
+    lv_target_path     TYPE string,
     iv_package         TYPE devclass.
 
   " this will initialize ZABAPGIT in dictionary
   zcl_abapgit_migrations=>run( ).
 
+  CONCATENATE pfolder '/SysparencyExport_' sy-datlo '_' sy-timlo into lv_target_path.
   "ls_local_settings-main_language_only = iv_main_lang_only.
 
 * load all matching packages
@@ -76,7 +78,7 @@ START-OF-SELECTION.
 
   LOOP AT it_pks INTO iv_package.
 
-    WRITE: / iv_package.
+    WRITE / iv_package.
 
     lo_frontend_serv = zcl_abapgit_ui_factory=>get_frontend_services( ).
 
@@ -96,15 +98,15 @@ START-OF-SELECTION.
          "iv_show_log       = iv_show_log
          io_dot_abapgit    = lo_dot_abapgit ).
 
-        "        lv_path = lo_frontend_serv->show_file_save_dialog(
+        "        lv_zipfile_path = lo_frontend_serv->show_file_save_dialog(
         "            iv_title            = 'Package Export'
         "            iv_extension        = 'zip'
         "            iv_default_filename = lv_default ).
 
-        CONCATENATE pfolder '/' lv_default '.zip' INTO lv_path.
+        CONCATENATE lv_target_path '/' lv_default '.zip' INTO lv_zipfile_path.
 
         lo_frontend_serv->file_download(
-            iv_path = lv_path
+            iv_path = lv_zipfile_path
             iv_xstr = lv_zip_xstring ).
 
       CATCH zcx_abapgit_exception INTO lx_error.
@@ -118,127 +120,128 @@ START-OF-SELECTION.
 
   ENDLOOP.
 
-  perform downloadSysparencyDump.
+  PERFORM downloadsysparencydump.
 
-  WRITE: / 'Finished downloading'.
+  WRITE / 'Finished downloading'.
 
 END-OF-SELECTION.
 
-form downloadSysparencyDump.
+FORM downloadsysparencydump.
   IF psysjobs = 'X'.
-   TYPES: BEGIN OF t_datatab,
-         jobcount   TYPE tbtco-jobcount,
-         jobname    TYPE tbtco-jobname,
-         jobgroup   TYPE tbtco-jobgroup,
-         stepcount  TYPE tbtcp-stepcount,
-         progname   TYPE tbtcp-progname,
-         lastchname TYPE tbtco-lastchname,
-         periodic   TYPE tbtco-periodic,
-         sdlstrtdt  TYPE tbtco-sdlstrtdt,
-         sdlstrttm  TYPE tbtco-sdlstrttm,
-         strtdate   TYPE tbtco-strtdate,
-         strttime   TYPE tbtco-strttime,
-         prdmonths  TYPE tbtco-prdmonths,
-         prdweeks   TYPE tbtco-prdweeks,
-         prddays    TYPE tbtco-prddays,
-         prdhours   TYPE tbtco-prdhours,
-         prdmins    TYPE tbtco-prdmins,
-         btcsystem  TYPE tbtco-btcsystem,
-         status     TYPE tbtco-status,
-         succnum    TYPE tbtco-succnum,
-         prednum    TYPE tbtco-prednum,
-         jobclass   TYPE tbtco-jobclass,
-         priority   TYPE tbtco-priority,
-         eventid    TYPE btcevtjob-eventid,
-       END OF t_datatab.
+    TYPES: BEGIN OF t_datatab,
+             jobcount   TYPE tbtco-jobcount,
+             jobname    TYPE tbtco-jobname,
+             jobgroup   TYPE tbtco-jobgroup,
+             stepcount  TYPE tbtcp-stepcount,
+             progname   TYPE tbtcp-progname,
+             lastchname TYPE tbtco-lastchname,
+             periodic   TYPE tbtco-periodic,
+             sdlstrtdt  TYPE tbtco-sdlstrtdt,
+             sdlstrttm  TYPE tbtco-sdlstrttm,
+             strtdate   TYPE tbtco-strtdate,
+             strttime   TYPE tbtco-strttime,
+             prdmonths  TYPE tbtco-prdmonths,
+             prdweeks   TYPE tbtco-prdweeks,
+             prddays    TYPE tbtco-prddays,
+             prdhours   TYPE tbtco-prdhours,
+             prdmins    TYPE tbtco-prdmins,
+             btcsystem  TYPE tbtco-btcsystem,
+             status     TYPE tbtco-status,
+             succnum    TYPE tbtco-succnum,
+             prednum    TYPE tbtco-prednum,
+             jobclass   TYPE tbtco-jobclass,
+             priority   TYPE tbtco-priority,
+             eventid    TYPE btcevtjob-eventid,
+           END OF t_datatab.
 
-  DATA: it_datatab TYPE STANDARD TABLE OF t_datatab INITIAL SIZE 0.
+    DATA it_datatab TYPE STANDARD TABLE OF t_datatab INITIAL SIZE 0.
 
-  SELECT j~jobcount
-  j~jobname
-  j~jobgroup
-  s~stepcount
-  s~progname
-  j~lastchname
-  j~periodic
-  j~sdlstrtdt
-  j~sdlstrttm
-  j~strtdate
-  j~strttime
-  j~prdmonths
-  j~prdweeks
-  j~prddays
-  j~prdhours
-  j~prdmins
-  j~btcsystem
-  j~status
-  j~succnum
-  j~prednum
-  j~jobclass
-  j~priority
-  e~eventid
-    FROM tbtco AS j
-    INNER JOIN tbtcp AS s
-    ON j~jobname = s~jobname AND j~jobcount = s~jobcount
-    LEFT JOIN btcevtjob AS e ON j~jobname = e~jobname AND j~jobcount = e~jobcount
-    INTO CORRESPONDING FIELDS OF TABLE it_datatab
-    WHERE j~status = 'S' OR j~status = 'Y' OR j~status = 'Z' OR j~status = 'R'
-    ORDER BY j~jobname DESCENDING.
+    SELECT j~jobcount
+    j~jobname
+    j~jobgroup
+    s~stepcount
+    s~progname
+    j~lastchname
+    j~periodic
+    j~sdlstrtdt
+    j~sdlstrttm
+    j~strtdate
+    j~strttime
+    j~prdmonths
+    j~prdweeks
+    j~prddays
+    j~prdhours
+    j~prdmins
+    j~btcsystem
+    j~status
+    j~succnum
+    j~prednum
+    j~jobclass
+    j~priority
+    e~eventid
+      FROM tbtco AS j
+      INNER JOIN tbtcp AS s
+      ON j~jobname = s~jobname AND j~jobcount = s~jobcount
+      LEFT JOIN btcevtjob AS e ON j~jobname = e~jobname AND j~jobcount = e~jobcount
+      INTO CORRESPONDING FIELDS OF TABLE it_datatab
+      WHERE j~status = 'S' OR j~status = 'Y' OR j~status = 'Z' OR j~status = 'R'
+      ORDER BY j~jobname DESCENDING.
 
-  TRY.
-      DATA: jobfilename    TYPE string.
-      CONCATENATE pFolder '/SysparencyJobExport.sysp' INTO jobfilename.
-      cl_gui_frontend_services=>gui_download(
-        EXPORTING
-          filename = jobfilename
-          filetype = 'DAT'
-          codepage = '4110'
-        CHANGING
-          data_tab = it_datatab ).
-    CATCH cx_root INTO DATA(e_text).
-      MESSAGE e_text->get_text( ) TYPE 'I'.
-  ENDTRY.
+    TRY.
+        DATA jobfilename    TYPE string.
+        CONCATENATE lv_target_path '/SysparencyJobExport.sysp' INTO jobfilename.
+        cl_gui_frontend_services=>gui_download(
+          EXPORTING
+            filename = jobfilename
+            filetype = 'DAT'
+            codepage = '4110'
+          CHANGING
+            data_tab = it_datatab ).
+      CATCH cx_root INTO DATA(e_text).
+        MESSAGE e_text->get_text( ) TYPE 'I'.
+    ENDTRY.
   ENDIF.
 
   IF psystran = 'X'.
-  TRY.
-      SELECT *
-        INTO TABLE @DATA(it_tstc)
-        FROM tstc
-        WHERE tcode LIKE 'Z%' OR tcode LIKE 'Y%'
-        ORDER BY tcode DESCENDING.
+    TRY.
+        SELECT *
+          INTO TABLE @DATA(it_tstc)
+          FROM tstc
+          WHERE tcode LIKE 'Z%' OR tcode LIKE 'Y%'
+          ORDER BY tcode DESCENDING.
 
-      DATA: transactionfilename    TYPE string.
-      CONCATENATE pFolder '/SysparencyTransactionExport.sysp' INTO transactionfilename.
-      cl_gui_frontend_services=>gui_download(
-        EXPORTING
-          filename = transactionfilename
-          filetype = 'DAT'
-          codepage = '4110'
-        CHANGING
-          data_tab = it_tstc ).
-    CATCH cx_root INTO DATA(e_text2).
-      MESSAGE e_text2->get_text( ) TYPE 'I'.
-  ENDTRY.
+        DATA transactionfilename    TYPE string.
+        CONCATENATE lv_target_path '/SysparencyTransactionExport.sysp' INTO transactionfilename.
+        cl_gui_frontend_services=>gui_download(
+          EXPORTING
+            filename = transactionfilename
+            filetype = 'DAT'
+            codepage = '4110'
+          CHANGING
+            data_tab = it_tstc ).
+      CATCH cx_root INTO DATA(e_text2).
+        MESSAGE e_text2->get_text( ) TYPE 'I'.
+    ENDTRY.
   ENDIF.
 
   IF psysprog = 'X'.
-  TRY.
-      SELECT *
-        INTO TABLE @DATA(it_progdir)
-        FROM progdir
-        WHERE name LIKE 'Z%' OR name LIKE 'Y%'.
-      DATA: progdirfilename    TYPE string.
-      CONCATENATE pFolder '/SysparencyProgdirExport.sysp' INTO progdirfilename.
-      cl_gui_frontend_services=>gui_download(
-        EXPORTING
-          filename = progdirfilename
-          filetype = 'DAT'
-          codepage = '4110'
-        CHANGING
-          data_tab = it_progdir ).
-    CATCH cx_root INTO DATA(e_text3).
-      MESSAGE e_text3->get_text( ) TYPE 'I'.
-  ENDTRY.
+    TRY.
+        SELECT *
+          INTO TABLE @DATA(it_progdir)
+          FROM progdir
+          WHERE name LIKE 'Z%' OR name LIKE 'Y%'
+          ORDER BY PRIMARY KEY.
+        DATA progdirfilename    TYPE string.
+        CONCATENATE lv_target_path '/SysparencyProgdirExport.sysp' INTO progdirfilename.
+        cl_gui_frontend_services=>gui_download(
+          EXPORTING
+            filename = progdirfilename
+            filetype = 'DAT'
+            codepage = '4110'
+          CHANGING
+            data_tab = it_progdir ).
+      CATCH cx_root INTO DATA(e_text3).
+        MESSAGE e_text3->get_text( ) TYPE 'I'.
+    ENDTRY.
   ENDIF.
-endform.
+ENDFORM.
