@@ -34,6 +34,10 @@ SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 5(18) tsysprog.
 PARAMETERS psysprog AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(18) tsyslog.
+PARAMETERS psyslog AS CHECKBOX.
+SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF BLOCK bsysp.
 
 INITIALIZATION.
@@ -45,6 +49,7 @@ INITIALIZATION.
   tsysjobs = 'Jobs'.
   tsystran = 'Transactions'.
   tsysprog = 'Program structure'.
+  tsyslog = 'Verbose Log'.
 
 START-OF-SELECTION.
 
@@ -59,13 +64,19 @@ START-OF-SELECTION.
     lv_package_escaped TYPE string,
     lv_zipfile_path    TYPE string,
     lv_target_path     TYPE string,
-    iv_package         TYPE devclass.
+    iv_package         TYPE devclass,
+    iv_show_log        TYPE abap_bool.
 
   " this will initialize ZABAPGIT in dictionary
   zcl_abapgit_migrations=>run( ).
 
   CONCATENATE pfolder '/SysparencyExport_' sy-datlo '_' sy-timlo into lv_target_path.
   "ls_local_settings-main_language_only = iv_main_lang_only.
+  IF ( psyslog = 'X' ).
+    iv_show_log = abap_true.
+  ELSE.
+    iv_show_log = abap_false.
+  ENDIF.
 
 * load all matching packages
   SELECT DISTINCT t~devclass
@@ -95,7 +106,7 @@ START-OF-SELECTION.
         lv_zip_xstring = zcl_abapgit_zip=>export(
          is_local_settings = ls_local_settings
          iv_package        = iv_package
-         "iv_show_log       = iv_show_log
+         iv_show_log       = iv_show_log
          io_dot_abapgit    = lo_dot_abapgit ).
 
         "        lv_zipfile_path = lo_frontend_serv->show_file_save_dialog(
