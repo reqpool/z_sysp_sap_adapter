@@ -4,7 +4,7 @@ Z-Transaction to dump code and data needed for Sysparency analysis using abapGit
 
 It requires SAP BASIS version 702 or higher.
  
-latest build: [z_sysp_sap_adapter2.zip](https://github.com/reqpool/z_sysp_sap_adapter/files/10577371/z_sysp_sap_adapter2.zip)
+latest build: [z_sysp_sap_adapter2.zip](https://github.com/reqpool/z_sysp_sap_adapter/files/11383344/z_sysp_sap_adapter2.zip)
 
 Build was generated using https://github.com/larshp/abapmerge
 
