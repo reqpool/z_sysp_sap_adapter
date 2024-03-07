@@ -8,6 +8,14 @@ latest build: [z_sysp_sap_adapter2.zip](https://github.com/reqpool/z_sysp_sap_ad
 
 Build was generated using https://github.com/larshp/abapmerge
 
+## Installation
+
+1. Download the latest build: [z_sysp_sap_adapter2.zip](https://github.com/reqpool/z_sysp_sap_adapter/files/14007835/z_sysp_sap_adapter2.zip)
+2. In your SAP® system in SE38, create the program Z_SYSP_SAP_ADAPTER2_STANDALONE with the downloaded ABAP® code and start it.
+3. Under Package you can select which files you want to download (e.g. Z* for all packages in the Z namespace).
+4. Run the report to download your ABAP® programs.
+   If the error "sy-subrc 15" occurs, check in the SAP GUI options -> Security -> Security Settings whether a rule prevents access to the local directory.
+
 
 # z_sysp_sap_adapter (deprecated)
 
