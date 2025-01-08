@@ -27,10 +27,6 @@ SELECTION-SCREEN COMMENT 5(18) tsysjobs.
 PARAMETERS psysjobs AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 5(18) tsystran.
-PARAMETERS psystran AS CHECKBOX DEFAULT 'X'.
-SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 5(18) tsysprog.
 PARAMETERS psysprog AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF LINE.
@@ -47,7 +43,6 @@ INITIALIZATION.
   tppath = 'Folder'.
   tblocksy = 'Sysparency Data'.
   tsysjobs = 'Jobs'.
-  tsystran = 'Transactions'.
   tsysprog = 'Program structure'.
   tsyslog = 'Verbose Log'.
 
@@ -79,10 +74,12 @@ START-OF-SELECTION.
   ENDIF.
 
 * load all matching packages
+  DATA it_pks TYPE TABLE OF tadir-devclass.
+
   SELECT DISTINCT t~devclass
   FROM tadir AS t INNER JOIN tdevc AS d
   ON t~devclass = d~devclass
-  INTO TABLE @DATA(it_pks)
+  INTO TABLE @it_pks
   WHERE t~devclass IN @sopack
   AND ( d~parentcl IS NULL OR d~parentcl = ' ' OR d~parentcl = '' )
   ORDER BY t~devclass.
@@ -198,6 +195,7 @@ FORM downloadsysparencydump.
       WHERE j~status = 'S' OR j~status = 'Y' OR j~status = 'Z' OR j~status = 'R'
       ORDER BY j~jobname DESCENDING.
 
+    DATA e_text TYPE REF TO cx_root.
     TRY.
         DATA jobfilename    TYPE string.
         CONCATENATE lv_target_path '/SysparencyJobExport.sysp' INTO jobfilename.
@@ -208,37 +206,17 @@ FORM downloadsysparencydump.
             codepage = '4110'
           CHANGING
             data_tab = it_datatab ).
-      CATCH cx_root INTO DATA(e_text).
+      CATCH cx_root INTO e_text.
         MESSAGE e_text->get_text( ) TYPE 'I'.
     ENDTRY.
   ENDIF.
 
-  IF psystran = 'X'.
-    TRY.
-        SELECT *
-          INTO TABLE @DATA(it_tstc)
-          FROM tstc
-          WHERE tcode LIKE 'Z%' OR tcode LIKE 'Y%'
-          ORDER BY tcode DESCENDING.
-
-        DATA transactionfilename    TYPE string.
-        CONCATENATE lv_target_path '/SysparencyTransactionExport.sysp' INTO transactionfilename.
-        cl_gui_frontend_services=>gui_download(
-          EXPORTING
-            filename = transactionfilename
-            filetype = 'DAT'
-            codepage = '4110'
-          CHANGING
-            data_tab = it_tstc ).
-      CATCH cx_root INTO DATA(e_text2).
-        MESSAGE e_text2->get_text( ) TYPE 'I'.
-    ENDTRY.
-  ENDIF.
-
   IF psysprog = 'X'.
+    DATA e_text2 TYPE REF TO cx_root.
     TRY.
+        DATA it_progdir TYPE TABLE OF progdir.
         SELECT *
-          INTO TABLE @DATA(it_progdir)
+          INTO TABLE it_progdir
           FROM progdir
           WHERE name LIKE 'Z%' OR name LIKE 'Y%'
           ORDER BY PRIMARY KEY.
@@ -251,8 +229,8 @@ FORM downloadsysparencydump.
             codepage = '4110'
           CHANGING
             data_tab = it_progdir ).
-      CATCH cx_root INTO DATA(e_text3).
-        MESSAGE e_text3->get_text( ) TYPE 'I'.
+      CATCH cx_root INTO e_text2.
+        MESSAGE e_text2->get_text( ) TYPE 'I'.
     ENDTRY.
   ENDIF.
 ENDFORM.
