@@ -66,7 +66,6 @@ START-OF-SELECTION.
   zcl_abapgit_migrations=>run( ).
 
   CONCATENATE pfolder '/SysparencyExport_' sy-datlo '_' sy-timlo into lv_target_path.
-  "ls_local_settings-main_language_only = iv_main_lang_only.
   IF ( psyslog = 'X' ).
     iv_show_log = abap_true.
   ELSE.
@@ -79,8 +78,8 @@ START-OF-SELECTION.
   SELECT DISTINCT t~devclass
   FROM tadir AS t INNER JOIN tdevc AS d
   ON t~devclass = d~devclass
-  INTO TABLE @it_pks
-  WHERE t~devclass IN @sopack
+  INTO TABLE it_pks
+  WHERE t~devclass IN sopack
   AND ( d~parentcl IS NULL OR d~parentcl = ' ' OR d~parentcl = '' )
   ORDER BY t~devclass.
 
