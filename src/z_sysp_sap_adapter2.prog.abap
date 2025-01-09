@@ -76,7 +76,7 @@ START-OF-SELECTION.
   DATA it_pks TYPE TABLE OF tadir-devclass.
 
   SELECT DISTINCT t~devclass
-  FROM tadir AS t INNER JOIN tdevc AS d
+    FROM tadir AS t INNER JOIN tdevc AS d
   ON t~devclass = d~devclass
   INTO TABLE it_pks
   WHERE t~devclass IN sopack
