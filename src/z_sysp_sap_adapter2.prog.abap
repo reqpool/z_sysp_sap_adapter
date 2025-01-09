@@ -215,7 +215,7 @@ FORM downloadsysparencydump.
           INTO TABLE it_progdir
           FROM progdir
           WHERE name LIKE 'Z%' OR name LIKE 'Y%'
-          ORDER BY PRIMARY KEY.
+          ORDER BY NAME STATE.
         DATA progdirfilename    TYPE string.
         CONCATENATE lv_target_path '/SysparencyProgdirExport.sysp' INTO progdirfilename.
         cl_gui_frontend_services=>gui_download(
