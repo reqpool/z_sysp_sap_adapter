@@ -78,7 +78,7 @@ START-OF-SELECTION.
   SELECT DISTINCT t~devclass
     FROM tadir AS t INNER JOIN tdevc AS d
     ON t~devclass = d~devclass
-  INTO TABLE it_pks
+    INTO TABLE it_pks
   WHERE t~devclass IN sopack
   AND ( d~parentcl IS NULL OR d~parentcl = ' ' OR d~parentcl = '' )
   ORDER BY t~devclass.
