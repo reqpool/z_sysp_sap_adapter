@@ -9,31 +9,31 @@ TABLES tadiv.
 
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE tblock1.
 
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(10) tpack.
-SELECT-OPTIONS sopack FOR tadiv-devclass DEFAULT 'Z*' OPTION CP.
-SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 1(10) tpack.
+    SELECT-OPTIONS sopack FOR tadiv-devclass DEFAULT 'Z*' OPTION CP.
+  SELECTION-SCREEN END OF LINE.
 
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(10) tppath.
-PARAMETERS pfolder LIKE rlgrap-filename DEFAULT 'c:/temp'.
-SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 1(10) tppath.
+    PARAMETERS pfolder LIKE rlgrap-filename DEFAULT 'c:/temp'.
+  SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN END OF BLOCK b1.
 
 SELECTION-SCREEN BEGIN OF BLOCK bsysp WITH FRAME TITLE tblocksy.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 5(18) tsysjobs.
-PARAMETERS psysjobs AS CHECKBOX DEFAULT 'X'.
-SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 5(18) tsysprog.
-PARAMETERS psysprog AS CHECKBOX DEFAULT 'X'.
-SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 5(18) tsyslog.
-PARAMETERS psyslog AS CHECKBOX.
-SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 5(18) tsysjobs.
+    PARAMETERS psysjobs AS CHECKBOX DEFAULT 'X'.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 5(18) tsysprog.
+    PARAMETERS psysprog AS CHECKBOX DEFAULT 'X'.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 5(18) tsyslog.
+    PARAMETERS psyslog AS CHECKBOX.
+  SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF BLOCK bsysp.
 
 INITIALIZATION.
@@ -65,7 +65,7 @@ START-OF-SELECTION.
   " this will initialize ZABAPGIT in dictionary
   zcl_abapgit_migrations=>run( ).
 
-  CONCATENATE pfolder '/SysparencyExport_' sy-datlo '_' sy-timlo into lv_target_path.
+  CONCATENATE pfolder '/SysparencyExport_' sy-datlo '_' sy-timlo INTO lv_target_path.
   IF ( psyslog = 'X' ).
     iv_show_log = abap_true.
   ELSE.
@@ -76,9 +76,9 @@ START-OF-SELECTION.
   DATA it_pks TYPE TABLE OF tadir-devclass.
 
   SELECT DISTINCT t~devclass
-  FROM tadir AS t INNER JOIN tdevc AS d
-  ON t~devclass = d~devclass
-  INTO TABLE it_pks
+    FROM tadir AS t INNER JOIN tdevc AS d
+    ON t~devclass = d~devclass
+    INTO TABLE it_pks
   WHERE t~devclass IN sopack
   AND ( d~parentcl IS NULL OR d~parentcl = ' ' OR d~parentcl = '' )
   ORDER BY t~devclass.
@@ -94,7 +94,6 @@ START-OF-SELECTION.
     lv_default = |{ lv_package_escaped }_{ sy-datlo }_{ sy-timlo }|.
 
     TRY.
-        " ls_local_settings-main_language_only = iv_main_lang_only.
 
         lo_dot_abapgit = zcl_abapgit_dot_abapgit=>build_default( ).
         lo_dot_abapgit->set_folder_logic( 'FULL' ).
@@ -104,11 +103,6 @@ START-OF-SELECTION.
          iv_package        = iv_package
          iv_show_log       = iv_show_log
          io_dot_abapgit    = lo_dot_abapgit ).
-
-        "        lv_zipfile_path = lo_frontend_serv->show_file_save_dialog(
-        "            iv_title            = 'Package Export'
-        "            iv_extension        = 'zip'
-        "            iv_default_filename = lv_default ).
 
         CONCATENATE lv_target_path '/' lv_default '.zip' INTO lv_zipfile_path.
 
@@ -194,9 +188,10 @@ FORM downloadsysparencydump.
       WHERE j~status = 'S' OR j~status = 'Y' OR j~status = 'Z' OR j~status = 'R'
       ORDER BY j~jobname DESCENDING.
 
-    DATA e_text TYPE REF TO cx_root.
+    DATA: e_text      TYPE REF TO cx_root,
+          jobfilename TYPE string,
+          text        TYPE string.
     TRY.
-        DATA jobfilename    TYPE string.
         CONCATENATE lv_target_path '/SysparencyJobExport.sysp' INTO jobfilename.
         cl_gui_frontend_services=>gui_download(
           EXPORTING
@@ -206,14 +201,16 @@ FORM downloadsysparencydump.
           CHANGING
             data_tab = it_datatab ).
       CATCH cx_root INTO e_text.
-        MESSAGE e_text->get_text( ) TYPE 'I'.
+        text = e_text->get_text( ).
+        MESSAGE text TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
   ENDIF.
 
   IF psysprog = 'X'.
-    DATA e_text2 TYPE REF TO cx_root.
+    DATA: e_text2    TYPE REF TO cx_root,
+          it_progdir TYPE TABLE OF progdir,
+          text2      TYPE string.
     TRY.
-        DATA it_progdir TYPE TABLE OF progdir.
         SELECT *
           INTO TABLE it_progdir
           FROM progdir
@@ -229,7 +226,8 @@ FORM downloadsysparencydump.
           CHANGING
             data_tab = it_progdir ).
       CATCH cx_root INTO e_text2.
-        MESSAGE e_text2->get_text( ) TYPE 'I'.
+        text2 = e_text->get_text( ).
+        MESSAGE text2 TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
   ENDIF.
 ENDFORM.
