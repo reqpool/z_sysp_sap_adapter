@@ -6,7 +6,7 @@ It requires SAP BASIS version 702 or higher.
  
 latest build: [z_sysp_sap_adapter2.zip](https://github.com/user-attachments/files/18361647/z_sysp_sap_adapter2.zip)
 
-Build was generated using https://github.com/larshp/abapmerge
+Build was generated using [abapmerge](https://github.com/larshp/abapmerge)
 
 ## Installation
 
@@ -16,3 +16,5 @@ Build was generated using https://github.com/larshp/abapmerge
 4. Run the report to download your ABAP® programs.
    If the error "sy-subrc 15" occurs, check in the SAP GUI options -> Security -> Security Settings whether a rule prevents access to the local directory.
 
+## Credits and References
+Adapter is based on [abapGit](https://github.com/abapGit/abapGit).
