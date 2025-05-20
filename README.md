@@ -16,7 +16,3 @@ Build was generated using https://github.com/larshp/abapmerge
 4. Run the report to download your ABAP® programs.
    If the error "sy-subrc 15" occurs, check in the SAP GUI options -> Security -> Security Settings whether a rule prevents access to the local directory.
 
-
-# z_sysp_sap_adapter (deprecated)
-
-Z-Transaction to dump data needed for Sysparency analysis using zdtp_massdownload
